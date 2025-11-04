@@ -33,14 +33,18 @@ void ensure_capacity(int *num_ptr,int *capacity_ptr,contact ***contacts_ptr)
 {
     int new_capacity=0;
     if(*num_ptr==*capacity_ptr){
+        int old_capacity=*capacity_ptr;
         new_capacity=(*capacity_ptr==0)?8:*capacity_ptr*2;
         contact **temp=realloc(*contacts_ptr,sizeof(contact *)*(new_capacity));
             if(temp==NULL){
                 printf("内存分配失败\n");
-            }else{
-                *contacts_ptr=temp;
-                *capacity_ptr=new_capacity;
+                return;
             }
+            for(int i=old_capacity;i<new_capacity;i++){
+                temp[i]=NULL;
+            }
+            *contacts_ptr=temp;
+            *capacity_ptr=new_capacity;
     }
 }
 void delete_contact(int *num_ptr,contact **contacts)
