@@ -1,5 +1,5 @@
 #include "utils.h"
-
+static int g_id_counter = 1;
 int add(int a,int b)
 {
     int c;
@@ -8,8 +8,10 @@ int add(int a,int b)
 }
 
 contact* creat_contact()
-{
+{   
     contact *p=(contact *)malloc(sizeof(contact));
+    p->id=g_id_counter;
+    g_id_counter++;
     printf("请输入联系人的姓名 电话号码 邮箱(按name回车phone回车email回车格式输入)\n");
     fgets(p->name,50,stdin);
     p->name[strcspn(p->name, "\n")] = '\0'; // 去掉换行符
@@ -31,14 +33,18 @@ void ensure_capacity(int *num_ptr,int *capacity_ptr,contact ***contacts_ptr)
 {
     int new_capacity=0;
     if(*num_ptr==*capacity_ptr){
+        int old_capacity=*capacity_ptr;
         new_capacity=(*capacity_ptr==0)?8:*capacity_ptr*2;
         contact **temp=realloc(*contacts_ptr,sizeof(contact *)*(new_capacity));
             if(temp==NULL){
                 printf("内存分配失败\n");
-            }else{
-                *contacts_ptr=temp;
-                *capacity_ptr=new_capacity;
+                return;
             }
+            for(int i=old_capacity;i<new_capacity;i++){
+                temp[i]=NULL;
+            }
+            *contacts_ptr=temp;
+            *capacity_ptr=new_capacity;
     }
 }
 void delete_contact(int *num_ptr,contact **contacts)
@@ -64,7 +70,7 @@ void print_all_contact(contact **contacts,int num)
     int i=0;
     printf("--- 所有联系人 ---\n");
     for(i=0;i<num;i++){
-        printf("%d: %s %s %s\n",i+1,contacts[i]->name,contacts[i]->phone,contacts[i]->email);
+        printf("id=%d %d: %s %s %s\n",contacts[i]->id,i+1,contacts[i]->name,contacts[i]->phone,contacts[i]->email);
     }
     printf("-------------------\n");
 
@@ -118,6 +124,7 @@ void load_contacts(int *num_ptr,int *capacity_ptr,contact ***contacts_ptr)
     }
     contact temp_contact_buffer;
     contact *new_insurance_key=NULL;
+    int max_id_found = 0;
     while(fread(&temp_contact_buffer,sizeof(contact),1,f)){
         ensure_capacity(num_ptr,capacity_ptr,contacts_ptr);
         new_insurance_key=(contact *)malloc(sizeof(contact));
@@ -126,11 +133,17 @@ void load_contacts(int *num_ptr,int *capacity_ptr,contact ***contacts_ptr)
             break;
         }
         *new_insurance_key=temp_contact_buffer;
+        if (new_insurance_key->id > max_id_found) {
+            max_id_found = new_insurance_key->id;
+        }
         add_contact_to_list(*contacts_ptr,num_ptr,new_insurance_key);
         /*(*contacts_ptr)[*num_ptr]=new_insurance_key;
         *num_ptr=*num_ptr+1;*/
     }
     fclose(f);
+    if(max_id_found>0){
+        g_id_counter = max_id_found + 1;
+    }
     printf("已从contacts.dat文件加载到%d个联系人\n",*num_ptr);
 }
 void add_contact_to_list(contact **contacts,int *num_ptr,contact *new_key)
