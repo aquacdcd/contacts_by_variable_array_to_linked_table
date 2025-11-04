@@ -8,8 +8,10 @@ int add(int a,int b)
 }
 
 contact* creat_contact()
-{
+{   static int id_counter=1;
     contact *p=(contact *)malloc(sizeof(contact));
+    p->id=id_counter;
+    id_counter++;
     printf("请输入联系人的姓名 电话号码 邮箱(按name回车phone回车email回车格式输入)\n");
     fgets(p->name,50,stdin);
     p->name[strcspn(p->name, "\n")] = '\0'; // 去掉换行符
@@ -64,7 +66,7 @@ void print_all_contact(contact **contacts,int num)
     int i=0;
     printf("--- 所有联系人 ---\n");
     for(i=0;i<num;i++){
-        printf("%d: %s %s %s\n",i+1,contacts[i]->name,contacts[i]->phone,contacts[i]->email);
+        printf("id=%d %d: %s %s %s\n",contacts[i]->id,i+1,contacts[i]->name,contacts[i]->phone,contacts[i]->email);
     }
     printf("-------------------\n");
 
