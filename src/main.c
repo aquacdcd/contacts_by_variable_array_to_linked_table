@@ -3,7 +3,6 @@
 void find_contact_by_name(int num,contact **contacts);
 int main(void)
 {
-    int fnum=0;
     int mode=0;
     int num=0;
     int capacity=0;
